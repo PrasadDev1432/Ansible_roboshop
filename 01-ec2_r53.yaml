@@ -2,6 +2,7 @@
 - name: create EC2 instance
   hosts: local
   connection: local
+
   vars:
     ami_id: "ami-0220d79f3f480ecf5"
     sg_id: "sg-03b82330a83a2ba79"
@@ -9,6 +10,9 @@
     domain_name: "prasaddev.shop"
     instance:
     - mongodb
+    - frontend
+    - user
+
   tasks:
   - name: create ec2 instance
     amazon.aws.ec2_instance:
@@ -21,6 +25,33 @@
     loop: "{{ instance }}"
     register: ec2_output
 
-  - name: print the ec2_output
-    ansible.builtin.debug:
-      msg: "ec2_instance: {{ ec2_output }}"
+  # - name: print the ec2_output
+  #   ansible.builtin.debug:
+  #     msg: "ec2_instance: {{ ec2_output }}"
+
+  - name: print the public IP
+    ansible.builtin.debug: 
+      msg: "{{ item.instance[0].public_ip_address }}"
+    loop: "{{ ec2_output.results }}"
+    loop_control:
+      label: "{{ item.item }}"
+
+  - name: print the private IP
+    ansible.builtin.debug: 
+      msg: "{{ item.instance[0].private_ip_address }}"
+    loop: "{{ ec2_output.results }}"
+    loop_control:
+      label: "{{ item.item }}"
+
+  # - name: create route53 records
+  #   amazon.aws.route53:
+  #     state: present
+  #     hosted_zone_id: "{{ zone_id }}"
+  #     record: "{{ item.item }}.{{ domain_name }}"
+  #     type: A
+  #     ttl: 1
+  #     value: "{{ item.instances[0].public_ip_address if item.item == 'frontend' else item.instances[0].private_ip_address }}"
+  #     overwrite: true
+  #   loop: "{{ ec2_output.results }}"
+  #   loop_control:
+  #     label: "{{ item.item }}"
