@@ -43,6 +43,24 @@
     loop_control:
       label: "{{ item.item }}"
 
+  - name: Print IPs
+    ansible.builtin.debug:
+      msg:
+        - "Instance    = {{ item.item }}"
+        - "Instance_ID = {{ item.instances[0].instance_id }}"
+        - "Public_IP   = {{ item.instances[0].public_ip_address | default('N/A') }}"
+        - "Private_IP  = {{ item.instances[0].private_ip_address }}"
+    loop: "{{ ec2_output.results }}"
+    loop_control:
+      label: "{{ item.item }}"
+
+
+
+
+
+
+
+
   - name: create route53 records
     amazon.aws.route53:
       state: present
