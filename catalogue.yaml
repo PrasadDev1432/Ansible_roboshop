@@ -78,13 +78,6 @@
       dest: /etc/systemd/system/catalogue.service
       remote_src: yes
 
-  - name: daemon reload enable and start
-    ansible.builtin.systemd_service:
-      name: catalogue
-      enabled: true
-      state: started
-      daemon_reload: true
-
 # Task:- 13 load the mongodb server
   - name: load the mongodb server
     ansible.builtin.copy:
@@ -151,6 +144,12 @@
     ansible.builtin.debug:
       var: product_data.stdout
 
+  - name: daemon reload enable and start
+    ansible.builtin.systemd_service:
+      name: catalogue
+      enabled: true
+      state: started
+      daemon_reload: true
 
   - name: start and enable cataalogue
     ansible.builtin.service:
