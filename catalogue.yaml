@@ -23,7 +23,6 @@
     ansible.builtin.user:
       name: roboshop
       state: absent
-      remove: yes
 
 # Task:-5 Create roboshop system user if not exists, skip if exists
   - name: Task 1 - Create roboshop system user if not exists, skip if exists
