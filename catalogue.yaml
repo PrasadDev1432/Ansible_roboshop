@@ -38,10 +38,8 @@
 # Task:-6 removing existing app directory
   - name: removing existing app directory
     ansible.builtin.file:
-      name: app
       path: /app
       state: absent
-      remove: yes
 
 # Task:-7 Creating app directory
   - name: Creating app directory
@@ -55,7 +53,6 @@
     ansible.builtin.file:
       path: /tmp/catalogue.zip
       state: absent
-      remove: yes
 
 # Task:-9 Download the application code to created app directory.
   - name: Download the application code to created app directory.
@@ -69,6 +66,7 @@
       src: /tmp/catalogue.zip
       dest: /app
       remote_src: yes
+
 # Task:- 11 Lets download the dependencies.
   - name: Lets download the dependencies
     community.general.npm:
@@ -77,7 +75,6 @@
 # Task:- 12 Setup SystemD Catalogue Service
   - name: Setup SystemD Catalogue Service
     ansible.builtin.copy:
-      name: catalogue.service
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
 
@@ -92,7 +89,6 @@
 # Task:- 13 load the mongodb server
   - name: load the mongodb server
     ansible.builtin.copy:
-      name: mongo.repo
       src: mongo.repo
       dest: /etc/yum.repos.d/mongo.repo
 
@@ -103,8 +99,6 @@
       state: present
 
 # Task:- 15 connnect to mongodb catalogue
-
-
   - name: Check whether catalogue database exists
     ansible.builtin.command:
       argv:
