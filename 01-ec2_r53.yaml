@@ -4,7 +4,7 @@
   connection: local
 
   vars:
-    ami_id: "ami-0220d79f3f480ecf5"
+    ami_id: "ami-0055977a6e828a4f4"
     sg_id: "sg-03b82330a83a2ba79"
     zone_id: "Z1007411AWVOBZQ97XGF"
     domain_name: "prasaddev.shop"

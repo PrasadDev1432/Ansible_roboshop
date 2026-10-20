@@ -52,7 +52,7 @@
 
 # Task:-8 removing existing code catalogue files
   - name: removing existing code catalogue files
-    ansible.ansible.file:
+    ansible.builtin.file:
       path: /tmp/catalogue.zip
       state: absent
       remove: yes
