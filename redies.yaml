@@ -1,11 +1,11 @@
-# create redies server
-- name: create redies server
-  hosts: redies
+# create redis server
+- name: create redis server
+  hosts: redis
   become: yes
 
   tasks:
 # Doc step 1: dnf module disable redis -y
-  - name: redies module disable
+  - name: redis module disable
     ansible.builtin.command: dnf module disable redis -y
 
 # Doc step 2: dnf module enable redis:7 -y
@@ -15,7 +15,7 @@
 # Doc step 3: dnf install redis -y
   - name: Install Redis
     ansible.builtin.package:
-      name: redies
+      name: redis
       state: present
 
 # Doc step 4: Update listen address from 127.0.0.1 to 0.0.0.0 in /etc/redis/redis.conf
@@ -33,8 +33,8 @@
       line: 'protected-mode no'
 
 # Doc step 6: Start & Enable MongoDB Service
-  - name: Start & Enable redies Service
+  - name: Start & Enable redis Service
     ansible.builtin.service:
-      name: redies
+      name: redis
       state: started
       enabled: yes
