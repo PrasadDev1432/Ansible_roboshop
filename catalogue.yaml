@@ -76,7 +76,6 @@
     ansible.builtin.copy:
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
-      remote_src: yes
 
 # Task:- 13 load the mongodb server
   - name: load the mongodb server
