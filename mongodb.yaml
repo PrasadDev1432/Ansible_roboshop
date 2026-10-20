@@ -19,7 +19,7 @@
 # Start & Enable MongoDB Service
   - name: Start & Enable MongoDB Service
     ansible.builtin.service:
-      name: Mongodb
+      name: mongod
       state: started
       enabled: yes
 
@@ -36,5 +36,5 @@
     # Doc step 5: systemctl restart mongodb
     - name: Restart mongodb
       ansible.builtin.service:
-        name: mongodb
+        name: mongod
         state: restarted
