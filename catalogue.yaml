@@ -77,7 +77,7 @@
     ansible.builtin.copy:
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
-
+      remote_src: yes
 
   - name: daemon reload enable and start
     ansible.builtin.systemd_service:
