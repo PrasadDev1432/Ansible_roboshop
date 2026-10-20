@@ -1,7 +1,7 @@
 # create Mongodb Server 
 - name: create Mongodb Server
   hosts: Mongodb
-  become: true
+  become: yes
 
   tasks:
 # Setup the MongoDB repo file
