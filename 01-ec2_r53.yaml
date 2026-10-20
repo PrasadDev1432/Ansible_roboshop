@@ -22,7 +22,7 @@
       image_id: "{{ ami_id }}"
       tags:
         Name: "{{ item }}"
-    loop: "{{ instance }}"
+    loop: "{{ instances }}"
     register: ec2_output
 
   # - name: print the ec2_output
@@ -46,7 +46,7 @@
   - name: Print IPs
     ansible.builtin.debug:
       msg:
-        - "Instance    = {{ item.item }}"
+        - "instances    = {{ item.item }}"
         - "Instance_ID = {{ item.instances[0].instance_id }}"
         - "Public_IP   = {{ item.instances[0].public_ip_address | default('N/A') }}"
         - "Private_IP  = {{ item.instances[0].private_ip_address }}"
