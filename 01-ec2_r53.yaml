@@ -8,10 +8,10 @@
     sg_id: "sg-03b82330a83a2ba79"
     zone_id: "Z1007411AWVOBZQ97XGF"
     domain_name: "prasaddev.shop"
-    instance:
-    - mongodb
-    - frontend
-    - user
+    # instance:
+    # - mongodb
+    # - frontend
+    # - user
 
   tasks:
   - name: create ec2 instance
