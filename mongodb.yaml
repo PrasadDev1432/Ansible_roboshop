@@ -1,6 +1,6 @@
 # create Mongodb Server 
 - name: create Mongodb Server
-  hosts: Mongodb
+  hosts: mongodb
   become: yes
 
   tasks:
