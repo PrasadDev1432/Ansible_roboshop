@@ -31,7 +31,7 @@
       owner: roboshop
       group: roboshop
 
-# Task:4 Download the application code
+# Task:4 Dogitwnload the application code
   - name: Download the application code
     ansible.builtin.get_url:
       url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
@@ -60,7 +60,7 @@
   - name: Setup SystemD Shipping Service
     ansible.builtin.copy:
       src: shipping.service
-      path: /etc/systemd/system/shipping.service
+      dest: /etc/systemd/system/shipping.service
 
 # Task:9 Load the service.
   - name: Load the service.
