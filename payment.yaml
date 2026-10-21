@@ -43,25 +43,35 @@
       src: /tmp/payment.zip
       dest: /app
       remote_src: yes
-  
-# Task:6 Lets download the dependencies.
+
+# Task:6 Set uid/gid in payment.ini to roboshop
+  - name: Set uid/gid in payment.ini to roboshop
+    ansible.builtin.lineinfile:
+      path: /app/payment.ini
+      regexp: '^{{ item }} ='
+      line: '{{ item }} = roboshop'
+    loop:
+      - uid
+      - gid
+
+# Task:7 Lets download the dependencies.
   - name: Lets download the dependencies.
     ansible.builtin.pip:
       requirements: /app/requirements.txt
       executable: pip3.9
 
-# Task:7 Setup SystemD Payment Service
+# Task:8 Setup SystemD Payment Service
   - name: Setup SystemD Payment Service
     ansible.builtin.copy:
       src: payment.service
       dest: /etc/systemd/system/payment.service
 
-# Task:8 Load the service
+# Task:9 Load the service
   - name: Load the service
     ansible.builtin.systemd_service:
       daemon_reload: true
 
-# Task:9 Start And enable payment server
+# Task:10 Start And enable payment server
   - name: Start And enable payment server
     ansible.builtin.service:
       name: payment
