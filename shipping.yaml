@@ -33,7 +33,7 @@
 
 # Task:4 Download the application code
   - name: Download the application code
-    community.general.get_url:
+    ansible.builtin.get_url:
       url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
       dest: /tmp/shipping.zip
 
