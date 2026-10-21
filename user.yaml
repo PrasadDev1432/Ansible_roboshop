@@ -1,0 +1,75 @@
+# creating user server
+- name: creating user server
+  hosts: user
+  become: yes
+
+  tasks:
+# Task:-1 Disable previews module
+  - name: Disable previews module
+    ansible.builtin.command: dnf module disable nodejs -y
+
+# Task:-2 Enable required module 
+  - name: Enable required module
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+# Task:-3 Installing Nodejs module 
+  - name: installing Nodejs module and unzip
+    ansible.builtin.package:
+      name:
+        - nodejs
+        - unzip
+      state: present
+
+# Task:-4 creating system user
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop
+      comment: roboshop system user
+      system: yes
+      home: /app
+      shell: /sbin/nologin
+      state: present
+
+# Task:-5 creating app directory
+  - name: creating app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+      owner: roboshop
+      group: roboshop
+
+# Task:-6 Dowunload the application code
+  - name: Download the application code
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip
+      dest: /tmp/user.zip
+
+# Task:-7 Unzip the code
+  - name: Unzip the code
+    ansible.builtin.unarchive:
+      src: /tmp/user.zip
+      dest: /app
+      remote_src: yes
+
+# Task:-8 Lets download the dependencies.
+  - name: Lets download the dependencies.
+    community.general.npm:
+      path: /app
+
+# Task:-9 Setup SystemD User Service
+  - name: Setup SystemD User Service
+    ansible.builtin.copy:
+      src: user.service
+      dest: /etc/systemd/system/user.service
+
+# Task:- 10 Load the service.
+  - name: Load the service.
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+# Task:-11 enable and start the service.
+  - name: enable and start the service.
+    ansible.builtin.service:
+      name: user
+      enabled: true
+      state: started

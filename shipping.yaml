@@ -1,0 +1,100 @@
+# creating shipping service
+- name: creating shipping service
+  hosts: shipping
+  become: yes
+
+  tasks:
+# Task:1 installing maven 
+  - name: installing maven and mysql, unzip
+    ansible.builtin.package:
+      name:
+        - maven
+        - mysql
+        - unzip
+      state: present
+
+# Task:2 Adding Application User
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop
+      system: yes
+      home: /app
+      shell: /sbin/nologin
+      comment: "roboshop system user" 
+      state: present
+
+# Task:3 Lets setup an app directory.
+  - name: Lets setup an app directory.
+    ansible.builtin.file:
+      path: /app
+      state: directory
+      owner: roboshop
+      group: roboshop
+
+# Task:4 Download the application code
+  - name: Download the application code
+    community.general.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+      dest: /tmp/shipping.zip
+
+# Task:5 lets unzip the download code
+  - name: lets unzip the download code
+    ansible.builtin.unarchive:
+      src: /tmp/shipping.zip
+      dest: /app
+      remote_src: yes
+
+# Task:6 Lets download the dependencies 
+  - name: Lets download the dependencies 
+    ansible.builtin.command: mvn clean package
+    args:
+      chdir: /app
+
+# Task:7 moving the shipping jar file 
+  - name: moving the shipping jar file
+    ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
+    args:
+      chdir: /app
+
+# Task:8 Setup SystemD Shipping Service
+  - name: Setup SystemD Shipping Service
+    ansible.builtin.copy:
+      src: shipping.service
+      path: /etc/systemd/system/shipping.service
+
+# Task:9 Load the service.
+  - name: Load the service.
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+# Task:10 start and enable the service
+  - name: start and enable the service
+    ansible.builtin.service:
+      name: shipping
+      state: started
+      enabled: yes
+
+  - name: Check cities database exists
+    ansible.builtin.shell: >
+      mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 -sN
+      -e "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='cities';"
+    register: db_check
+    changed_when: false
+
+  - name: Load schema
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/schema.sql
+    when: db_check.stdout | int == 0
+
+  - name: Create app user
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/app-user.sql
+    when: db_check.stdout | int == 0
+
+  - name: Load master data
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/master-data.sql
+    when: db_check.stdout | int == 0
+
+  - name: Restart shipping
+    ansible.builtin.service:
+      name: shipping
+      state: restarted
+    when: db_check.stdout | int == 0

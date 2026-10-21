@@ -1,0 +1,92 @@
+# creating shipping service
+- name: creating shipping service
+  hosts: shipping
+  become: yes
+
+  tasks:
+  - name: install maven, mysql client and unzip
+    ansible.builtin.package:
+      name:
+        - maven
+        - mysql
+        - unzip
+      state: present
+
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop
+      system: yes
+      home: /app
+      shell: /sbin/nologin
+      comment: "roboshop system user"
+      state: present
+
+  - name: creating app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+      owner: roboshop
+      group: roboshop
+
+  - name: Download the application code
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+      dest: /tmp/shipping.zip
+
+  - name: unzip the code
+    ansible.builtin.unarchive:
+      src: /tmp/shipping.zip
+      dest: /app
+      remote_src: yes
+
+  - name: Build the application
+    ansible.builtin.command: mvn clean package
+    args:
+      chdir: /app
+      creates: /app/shipping.jar
+
+  - name: Rename the jar file
+    ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
+    args:
+      chdir: /app
+      creates: /app/shipping.jar
+
+  - name: Setup SystemD Shipping Service
+    ansible.builtin.copy:
+      src: shipping.service
+      dest: /etc/systemd/system/shipping.service
+
+  - name: Load the service
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: enable and start the service
+    ansible.builtin.service:
+      name: shipping
+      enabled: true
+      state: started
+
+  - name: Check cities database exists
+    ansible.builtin.shell: >
+      mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 -sN
+      -e "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='cities';"
+    register: db_check
+    changed_when: false
+
+  - name: Load schema
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/schema.sql
+    when: db_check.stdout | int == 0
+
+  - name: Create app user
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/app-user.sql
+    when: db_check.stdout | int == 0
+
+  - name: Load master data
+    ansible.builtin.shell: mysql -h mysql.prasaddev.shop -uroot -pRoboShop@1 < /app/db/master-data.sql
+    when: db_check.stdout | int == 0
+
+  - name: Restart shipping
+    ansible.builtin.service:
+      name: shipping
+      state: restarted
+    when: db_check.stdout | int == 0

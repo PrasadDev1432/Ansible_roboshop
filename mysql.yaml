@@ -21,10 +21,11 @@
   - name: Check root password
     ansible.builtin.command: mysql -uroot -pRoboShop@1 -e 'show databases;'
     register: mysql_check
-    ignore_errors: true
+    failed_when: false
     changed_when: false
 
 # task: - 4 setup root password
   - name: setup root password
     ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
+    no_log: true
     when: mysql_check.rc != 0

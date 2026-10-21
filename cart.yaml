@@ -1,0 +1,75 @@
+# creating cart service
+- name: creating cart service
+  hosts: cart
+  become: yes
+
+  tasks:
+# Task:1 disable previews nodejs module
+  - name: disable previews nodejs module
+    ansible.builtin.command: dnf module disable nodejs -y
+
+# Task:2 enable required nodejs module
+  - name: enable required nodejs module
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+# Task:3 installing nodejs module
+  - name: installing nodejs module
+    ansible.builtin.package:
+      name:
+        - nodejs
+        - unzip
+      state: present
+
+# Task:4 creating system user
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop
+      system: yes
+      home: /app
+      shell: /sbin/nologin
+      comment: "roboshop system user" 
+      state: present
+
+# Task:5 creating app directory
+  - name: creating app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+      owner: roboshop
+      group: roboshop
+
+# Task:6 Download the application code
+  - name: Download the application code
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
+      dest: /tmp/cart.zip
+
+# Task:7 unzip the downladed file
+  - name: unzip the downladed file
+    ansible.builtin.unarchive:
+      src: /tmp/cart.zip
+      dest: /app
+      remote_src: yes
+
+# Task:8 Lets download the dependencies.
+  - name: Lets download the dependencies.
+    community.general.npm:
+      path: /app
+
+# Task:9 Setup SystemD Cart Service
+  - name: Setup SystemD Cart Service
+    ansible.builtin.copy:
+      src: cart.service
+      dest: /etc/systemd/system/cart.service
+
+# Task:10 Load the service.
+  - name: Load the service.
+    ansible.builtin.systemd_service: 
+      daemon-reload: true
+
+# Task:-11 enable and start the service.
+  - name: enable and start the service.
+    ansible.builtin.service:
+      name: cart
+      enabled: true
+      state: started
